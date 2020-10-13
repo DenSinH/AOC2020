@@ -1,0 +1,13 @@
+ARM ASM
+Haskell
+Python
+Java
+C
+C#
+JavaScript
+
+SQL?
+scratch?
+batch?
+vbs?
+php? (ew)
