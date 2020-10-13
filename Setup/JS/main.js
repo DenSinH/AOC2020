@@ -1,5 +1,7 @@
 "use strict";
 
+const dflt = 1;  // default part to solve
+
 
 function part1(input) {
     console.log(input);
@@ -13,14 +15,14 @@ function part2(input) {
 }
 
 
-function main() {
+function main(override) {
     let out = "";
 
     let radios = document.getElementsByName("part");
-    if (radios[0].checked) {
+    if ((!override && radios[0].checked) || (override && dflt == 1)) {
         out = "Part 1:" + part1(document.getElementById("input").innerHTML);
     }
-    else if (radios[1].checked) {
+    else if ((!override && radios[1].checked) || (override && dflt == 2)) {
         out = "Part 2: " + part2(document.getElementById("input").innerHTML);
     }
     else {
