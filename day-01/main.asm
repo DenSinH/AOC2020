@@ -82,9 +82,9 @@ part_1:
 
 part_1_done:
         mul r2, r2, r3
-        mov r0, #8
+        mov r0, #128
         mov r1, #8
-        bl draw_hex_value
+        bl draw_dec_value
 
 ; PART 2
 ; r0: stride * i
@@ -134,9 +134,9 @@ part_2:
 part_2_done:
         mul r2, r3, r4
         mul r2, r5
-        mov r0, #8
+        mov r0, #128
         mov r1, #16
-        bl draw_hex_value
+        bl draw_dec_value
 
 mainloop:
       b mainloop

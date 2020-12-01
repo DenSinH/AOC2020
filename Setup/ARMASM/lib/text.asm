@@ -96,6 +96,37 @@ draw_hex_value:
         ldmia sp!, { r0-r4, lr }
         bx lr
 
+draw_dec_value:
+        ; draw dec value r2 at (r0, r1) (NOTE: drawn from right to left
+        stmfd sp!, { r0-r6, lr }
+
+        mov r4, r0
+        mov r5, r1
+
+        mov r0, r2  ; number
+        _draw_dec_value_loop:
+                mov r1, #10 ; denom
+
+                swi 0x060000
+                ; return: r0: number div denom
+                ;         r1: number mod denom
+
+                ; store for next loop
+                mov r6, r0
+                add r2, r1, '0'       ; draw MOD
+
+                mov r0, r4            ; at location
+                mov r1, r5
+
+                bl draw_char
+
+                sub r4, #8
+                movs r0, r6           ; next number
+                bne _draw_dec_value_loop
+
+        ldmfd sp!, { r0-r6, lr }
+        bx lr
+
 
 
 
