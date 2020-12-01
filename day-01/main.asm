@@ -10,6 +10,17 @@ header:
 main:
 include './init.asm'
 
+; zero out array of 2048 bytes for byte array of bools
+mov r0, #MEM_IWRAM
+mov r1, #0
+set_word r9, MEM_IWRAM + 0x2000
+
+zero_out_loop:
+        str r1, [r9], #4
+        tst r9, #0x800
+        bne zero_out_loop
+sub r9, #0x800
+
 ; parse input
 ; store values as u32 array in MEM_IWRAM
 ; r0: pointer to array
@@ -18,37 +29,41 @@ include './init.asm'
 ; r3: accumulated value
 ; r4: input end address
 ; r5: 10
+; r6: 1
 mov r0, #MEM_IWRAM
 set_word r1, MEM_ROM + input
 set_word r4, MEM_ROM + input_end
 mov r5, #10
+mov r6, #1
 
 input_read:
         ldrb r2, [r1], #1
         cmp r2, '0'             ; newline marks next element (any character below 0)
-        strlt r3, [r0], #4
+        strlt r3, [r0], #4      ; store value accumulated
+        strltb r6, [r9, r3]     ; set byte in byte[] @r9
         movlt r3, #0            ; clear accumulated value
 
         blt read_line_feed
 
-        sub r2, '0'
-        mul r3, r5
+        sub r2, '0'             ; correct for ascii values
+        mul r3, r5              ; accum = (accum * 10) + new_val
         add r3, r2
 
-        cmp r1, r4
+        cmp r1, r4              ; EOF
         blt input_read
 
         ; store last value
         str r3, [r0], #4
+        strltb r6, [r9, r3]
 
-; find length of array
+; find length of array in bytes
 sub r10, r0, #MEM_IWRAM
 
 ; PART 1
 ; r0: stride * i
-; r1: stride * j
-; r2: xi
-; r3: xj
+; r1: x
+; r2: 2020 - x
+; r3: byte from bool[] @r9
 ; r4: array start
 ;
 ; r10: array length (in bytes)
@@ -59,29 +74,22 @@ mov r4, #MEM_IWRAM
 set_half r11, #2020
 
 part_1:
-        ; xi
-        ldr r2, [r4, r0]
+        ; x
+        ldr r1, [r4, r0]
         add r0, #4
-        mov r1, r0
 
-        part_1_j_loop:
-                ; xj
-                ldr r3, [r4, r1]
-                add r1, #4
+        ; 2020 - x
+        sub r2, r11, r1
 
-                ; xi + xj == 2020
-                add r5, r2, r3
-                cmp r5, r11
-                beq part_1_done
-
-                ; keep going until array length has been reached
-                cmp r1, r10
-                blt part_1_j_loop
+        ; bool[2020 - x]
+        ldrb r3, [r9, r2]
+        cmp r3, #0
+        bne part_1_done
 
         b part_1
 
 part_1_done:
-        mul r2, r2, r3
+        mul r2, r1, r2
         mov r0, #128
         mov r1, #8
         bl draw_dec_value
@@ -89,12 +97,13 @@ part_1_done:
 ; PART 2
 ; r0: stride * i
 ; r1: stride * j
-; r2: stride * k
+; r2: byte from bool[] @r9
 ; r3: xi
 ; r4: xj
-; r5: xk
+; r5: 2020 - xi - xj
 ; r6: array start
 ;
+; r9: bool[]
 ; r10: array length (in bytes)
 ; r11: 2020
 mov r0, #0
@@ -113,18 +122,12 @@ part_2:
 
                 ; xi + xj
                 add r7, r3, r4
+                sub r5, r11, r7
 
-                part_2_k_loop:
+                ldrb r2, [r9, r5]
+                cmp r2, #0
+                bne part_2_done
 
-                        ldr r5, [r6, r2]
-                        add r2, #4
-
-                        add r8, r7, r5 ; (xi + xj) + xk
-                        cmp r8, r11    ; == 2020
-                        beq part_2_done
-
-                        cmp r2, r10
-                        blt part_2_k_loop
 
                 cmp r1, r10
                 blt part_2_j_loop
