@@ -1,0 +1,3 @@
+from functools import reduce
+print("part 1:", (lambda text: sum([len(reduce(lambda a, b: a | b, [set(list(answers)) for answers in group.split("\n")])) for group in text.split("\n\n")]))(open("input.txt", "r").read()))
+print("part 2:", (lambda text: sum([len(reduce(lambda a, b: a & b, [set(list(answers)) for answers in group.split("\n")])) for group in text.split("\n\n")]))(open("input.txt", "r").read()))
