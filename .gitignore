@@ -1,2 +1,7 @@
 .idea/
 cmake-*/
+.vs/
+.vscode/
+Win32/
+*.sln
+*.visualdproj
