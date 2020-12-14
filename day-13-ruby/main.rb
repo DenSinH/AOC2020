@@ -23,8 +23,17 @@ acc = 1 # accumulated product of primes so far
 part_2 = 0
 $buses.each { |bus|
   if bus != "x"
-    while (Integer(bus) - (part_2 % Integer(bus))) != (offs % Integer(bus)) && !(offs % Integer(bus) == 0 && (part_2 % Integer(bus)) == 0)
-      part_2 += acc
+    time_until_bus = (Integer(bus) - (part_2 % Integer(bus)))
+    offset_required = (offs % Integer(bus))
+    # we need: the time until the bus arrives is the proper offset
+    # the way we calculate the time until the bus arrives, it might be equal to the bus' ID
+    # we need to catch this case to prevent an infinite loop
+    while time_until_bus != offset_required && !(offset_required == 0 && (part_2 % Integer(bus)) == 0)
+      # we can't mess up the results for the previous buses, so we need to add the accumulate
+      part_2 += acc 
+
+      # calculate the new time until the bus arrives with the new accumulated time stamp
+      time_until_bus = (Integer(bus) - (part_2 % Integer(bus)))
     end
     acc *= Integer(bus)
   end
