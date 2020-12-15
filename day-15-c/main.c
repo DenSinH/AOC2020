@@ -1,31 +1,32 @@
 #include <stdio.h>
 #include <memory.h>
+#include <stdbool.h>
 
 int input[] = {
 #include "input.txt"
 };
 
 typedef struct s_NumberData {
-    int times_said;
+    bool said;
     int prev_turn;
     int pre_prev_turn;
 } s_NumberData;
 
 s_NumberData said[30000000] = {};
 
-int say_number(int number, int turn) {
+inline __attribute__((always_inline)) int say_number(int number, int turn) {
     int next_number = 0;
 
     // say number
     said[number].pre_prev_turn = said[number].prev_turn;
     said[number].prev_turn = turn;
-    said[number].times_said++;
 
     // find next number
-    if (said[number].times_said > 1) {
+    if (said[number].said) {
         // number has been said before
         next_number = said[number].prev_turn - said[number].pre_prev_turn;
     }
+    said[number].said = true;
     return next_number;
 }
 
